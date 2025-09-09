@@ -59,4 +59,40 @@
 
 🔍 Compare: Verifies entered password against the stored hash.
 
-🛡️ Security: Ensures passwords are not stored in plain text
+🛡️ Security: Ensures passwords are not stored in plain text.
+
+🔑 jsonwebtoken (JWT)
+
+🎫 JWT: A compact, secure way to transmit information between client and server.
+
+🆔 Payload: Contains the user data (e.g., id, email).
+
+🔏 Signature: Ensures the token has not been tampered with.
+
+⏳ Expiration: Tokens can have a time limit for added security.
+
+🔒 Authentication: Commonly used for login sessions in APIs.
+
+📧 nodemailer
+
+📮 Nodemailer: A Node.js library to send emails.
+
+✉️ Transporter: Defines the email service configuration (e.g., Gmail, SMTP).
+
+📨 Mail Options: Defines the sender, recipient, subject, and body of an email.
+
+🔔 Use Case: Send verification emails, password reset links, notifications.
+
+🧾 Regex (Regular Expressions)
+
+🔍 Regex: A pattern-matching language for searching and validating strings.
+
+✅ Validation: Used to check formats (e.g., emails, phone numbers, passwords).
+
+🔄 Search & Replace: Find and modify parts of a string.
+
+⚡ Examples:
+
+^[A-Za-z0-9]+$ → Matches only letters and numbers.
+
+^\S+@\S+\.\S+$ → Matches a valid email format.
