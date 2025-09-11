@@ -3,8 +3,14 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const dotEnv = require("dotenv");
-const Auth = require("./authModel");
-const { sendMailTransport, isValidEmail,sendSignUpConfrimation } = require("./sendMail");
+const Auth = require("./models /authModel");
+const {
+  sendMailTransport,
+  isValidEmail,
+  sendSignUpConfrimation,
+} = require("./sendMail");
+const { handleGetAllUsers, handleUserRegistration } = require("./Controllers");
+const { validateUserRegistration, authorization } = require("./middlewares");
 dotEnv.config();
 
 const app = express();
@@ -19,66 +25,7 @@ mongoose.connect(process.env.MONGODB_URL).then(() => {
 });
 
 //signup
-app.post("/sign-up", async (req, res) => {
-  try {
-    const { email, password, firstName, lastName, state } = req.body;
-    if (!email) {
-      res.status(400).json({
-        message: "Please add your email",
-      });
-    }
-
-    if (!isValidEmail(email)) {
-      return res.status(404).json({
-        message: "Incorrect email format",
-      });
-    }
-
-    if (!password) {
-      res.status(400).json({
-        message: "Please add your password",
-      });
-    }
-
-    if (password.length < 6) {
-      res.status(400).json({
-        message: "Password should be a min of 6 char",
-      });
-    }
-
-    const existingUser = await Auth.findOne({ email });
-
-    if (existingUser) {
-      res.status(400).json({
-        message: "User account already existing",
-      });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 12);
-
-    const newUser = new Auth({
-      email,
-      password: hashedPassword,
-      firstName,
-      lastName,
-      state,
-    });
-
-    await newUser.save();
-
-    //SEND USER AN EMAIL
-   
-
-    res.status(201).json({
-      message: "User account created successfully",
-      newUser: { email, firstName, lastName, state },
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: error.message,
-    });
-  }
-});
+app.post("/sign-up", validateUserRegistration, handleUserRegistration);
 
 //login
 app.post("/login", async (req, res) => {
@@ -105,7 +52,7 @@ app.post("/login", async (req, res) => {
 
   //GENERATE TOKEN
   const accessToken = jwt.sign({ id: user?._id }, process.env.ACCESS_TOKEN, {
-    expiresIn: "5m",
+    expiresIn: "5h",
   });
 
   const refreshToken = jwt.sign({ id: user?._id }, process.env.REFRESH_TOKEN, {
@@ -120,6 +67,7 @@ app.post("/login", async (req, res) => {
       firstName: user?.firstName,
       lastName: user?.lastName,
       state: user?.state,
+      role: user?.role,
     },
     refreshToken,
   });
@@ -161,9 +109,9 @@ app.post("/forgot-password", async (req, res) => {
   });
 });
 
-app.patch("/reset-password", async (req, res) => {
+app.patch("/reset-password", authorization, async (req, res) => {
   const { email, password } = req.body;
-  const user = await Auth.findOne({ email });
+  const user = await Auth.findOne({ email: req.user.email });
   if (!user) {
     return res.status(404).json({
       message: "User account not found",
@@ -178,3 +126,10 @@ app.patch("/reset-password", async (req, res) => {
     message: "Password reset successful",
   });
 });
+
+//MVC -R
+//MODELS VIEW(written by the front end), CONTROLLER, ROUTES
+
+//MIDDLEWARE / AUTHORIZATION / VALIDATION
+
+app.get("/all-users", authorization, handleGetAllUsers);

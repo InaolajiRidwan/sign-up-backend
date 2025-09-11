@@ -1,3 +1,25 @@
+project/
+│── server.js               # Entry point
+│── .env                    # Environment variables
+│── package.json            # Dependencies & scripts
+│
+├── models/                 # Mongoose schemas
+│   └── User.js
+│
+├── controllers/            # Business logic
+│   └── userController.js
+│
+├── services/               # Helper services (e.g., auth, email)
+│   └── authService.js
+│
+├── middleware/             # Middlewares (auth, errors, logging)
+│   ├── authMiddleware.js
+│   └── errorMiddleware.js
+│
+├── routes/                 # API route definitions
+│   └── userRoutes.js
+
+
 🔑 Keywords & Concepts
 🟢 MongoDB
 
@@ -51,6 +73,52 @@
 
 🚨 Error-handling middleware: Catches and handles errors ((err, req, res, next)).
 
+🔍 Authentication middleware: Verifies user identity from a token or session.
+
+👮 Authorization middleware: Checks if the authenticated user has the right role or permission to access certain resources (e.g., only admins can see all users).
+
+🧑‍💻 Controller
+
+📌 Functionality: Controllers act as the “brain” of the application.
+
+🔄 Role: They handle incoming requests, call the appropriate services or models, and send back responses.
+
+📑 Examples:
+
+Handling registration and login.
+
+Returning a list of users (only if authorized).
+
+Updating or deleting a record in MongoDB.
+
+🏗️ Model
+
+📌 Functionality: Models define the shape of data and interact with the database.
+
+🔄 Role: Used to query MongoDB (create, read, update, delete documents).
+
+📑 Examples:
+
+A User model with username, email, password, and role.
+
+A Post model with title, body, author.
+
+🔑 Authorization (with JWT & Roles)
+
+📌 Functionality: Ensures only the right people can access specific routes.
+
+🆔 Authentication vs Authorization:
+
+Authentication: Confirms who the user is (e.g., via JWT token).
+
+Authorization: Confirms what the user can do (e.g., admin vs normal user).
+
+🔒 Use Case:
+
+Normal users can only access their profile.
+
+Admins can access /all-users.
+
 🔒 bcryptjs
 
 🔑 Hashing: Converts passwords into an unreadable format before storing.
@@ -65,13 +133,15 @@
 
 🎫 JWT: A compact, secure way to transmit information between client and server.
 
-🆔 Payload: Contains the user data (e.g., id, email).
+🆔 Payload: Contains the user data (e.g., id, email, role).
 
 🔏 Signature: Ensures the token has not been tampered with.
 
 ⏳ Expiration: Tokens can have a time limit for added security.
 
 🔒 Authentication: Commonly used for login sessions in APIs.
+
+👮 Authorization with role: Decides whether a user can access admin-only or user-only routes.
 
 📧 nodemailer
 
