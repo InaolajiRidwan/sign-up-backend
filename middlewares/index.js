@@ -34,7 +34,6 @@ const authorization = async (req, res, next) => {
   const realToken = splitToken[1];
 
   const decoded = jwt.verify(realToken, `${process.env.ACCESS_TOKEN}`);
-  console.log(decoded);
   if (!decoded) {
     return res.status(401).json({
       message: "Authorize user",

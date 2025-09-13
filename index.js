@@ -4,17 +4,13 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const dotEnv = require("dotenv");
 const Auth = require("./models /authModel");
-const {
-  sendMailTransport,
-  isValidEmail,
-  sendSignUpConfrimation,
-} = require("./sendMail");
-const { handleGetAllUsers, handleUserRegistration } = require("./Controllers");
-const { validateUserRegistration, authorization } = require("./middlewares");
+const cors = require("cors");
+const routes = require("./Routes")
 dotEnv.config();
 
 const app = express();
 app.use(express.json());
+app.use(cors());
 const PORT = process.env.PORT || 7000;
 
 mongoose.connect(process.env.MONGODB_URL).then(() => {
@@ -24,112 +20,8 @@ mongoose.connect(process.env.MONGODB_URL).then(() => {
   });
 });
 
-//signup
-app.post("/sign-up", validateUserRegistration, handleUserRegistration);
+app.use(routes)
 
-//login
-app.post("/login", async (req, res) => {
-  const { email, password } = req.body;
-  const user = await Auth.findOne({ email });
 
-  if (!user) {
-    return res.status(404).json({
-      message: "user account does not exist",
-    });
-  }
 
-  const isMatch = await bcrypt.compare(password, user?.password);
 
-  if (!isMatch) {
-    return res.status(400).json({
-      message: "Incorrect Email or Password",
-    });
-  }
-
-  // if(!user.verified){
-
-  // }
-
-  //GENERATE TOKEN
-  const accessToken = jwt.sign({ id: user?._id }, process.env.ACCESS_TOKEN, {
-    expiresIn: "5h",
-  });
-
-  const refreshToken = jwt.sign({ id: user?._id }, process.env.REFRESH_TOKEN, {
-    expiresIn: "30d",
-  });
-
-  res.status(200).json({
-    message: "Login successful",
-    accessToken,
-    user: {
-      email: user?.email,
-      firstName: user?.firstName,
-      lastName: user?.lastName,
-      state: user?.state,
-      role: user?.role,
-    },
-    refreshToken,
-  });
-});
-
-//forgot password
-
-app.post("/forgot-password", async (req, res) => {
-  const { email, username } = req.body;
-
-  // let user;
-  // if(email){
-  //   const user = awaith Auth.findOne({email})
-  // }
-
-  // if(username){
-  //   const user = awaith Auth.findOne({username})
-  // }
-
-  const user = await Auth.findOne({ email });
-
-  if (!user) {
-    return res.status(404).json({
-      message: "User not found",
-    });
-  }
-
-  //send the user an email come with their token
-
-  const accessToken = await jwt.sign({ user }, `${process.env.ACCESS_TOKEN}`, {
-    expiresIn: "5m",
-  });
-  await sendMailTransport(email, accessToken);
-
-  //send OTP(one time password)
-
-  res.status(200).json({
-    message: "Please check your email",
-  });
-});
-
-app.patch("/reset-password", authorization, async (req, res) => {
-  const { email, password } = req.body;
-  const user = await Auth.findOne({ email: req.user.email });
-  if (!user) {
-    return res.status(404).json({
-      message: "User account not found",
-    });
-  }
-
-  const hashedPassword = await bcrypt.hash(password, 12);
-  user.password = hashedPassword;
-  await user.save();
-
-  res.status(200).json({
-    message: "Password reset successful",
-  });
-});
-
-//MVC -R
-//MODELS VIEW(written by the front end), CONTROLLER, ROUTES
-
-//MIDDLEWARE / AUTHORIZATION / VALIDATION
-
-app.get("/all-users", authorization, handleGetAllUsers);
