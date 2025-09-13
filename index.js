@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 const dotEnv = require("dotenv");
 const Auth = require("./models /authModel");
 const cors = require("cors");
-const routes = require("./Routes")
+const routes = require("./Routes");
 dotEnv.config();
 
 const app = express();
@@ -20,10 +20,4 @@ mongoose.connect(process.env.MONGODB_URL).then(() => {
   });
 });
 
-
-
-app.use(routes)
-
-
-
-
+app.use("/api", routes);
